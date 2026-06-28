@@ -1,0 +1,13 @@
+# Large video files (hosted on YouTube)
+*.mp4
+*.mov
+Videos/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# IDE
+.vscode/
+.idea/
