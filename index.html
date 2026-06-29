@@ -1080,6 +1080,104 @@
         width: 56px;
         height: 56px;
       }
+
+      /* ===== MOBILE PERFORMANCE FIXES ===== */
+
+      /* Reduce floating photo sizes on mobile */
+      .floating-photo {
+        max-width: 80px !important;
+        max-height: 100px !important;
+        opacity: 0.4 !important;
+      }
+
+      /* Smaller floating food emojis */
+      .floating-food {
+        font-size: 1.4rem !important;
+        opacity: 0.5 !important;
+      }
+
+      /* Smaller balloons */
+      .balloon svg {
+        width: 24px !important;
+        height: 32px !important;
+      }
+
+      /* Reduce ambient emoji visibility */
+      .ambient-emoji {
+        opacity: 0.04 !important;
+        font-size: 0.7rem !important;
+      }
+
+      /* Reduce orb sizes to prevent overlap */
+      .orb {
+        transform: scale(0.4) !important;
+        opacity: 0.5 !important;
+      }
+
+      /* Reduce twinkle star sizes */
+      .twinkle {
+        opacity: 0.3 !important;
+      }
+
+      /* Ensure all content sections are above floating elements */
+      header, section, footer, .food-marquee, .string-container, .divider {
+        position: relative;
+        z-index: 10 !important;
+      }
+
+      /* Ensure text is always readable */
+      h1, h2, h3, p, span, button, .letter, .glass, .neon-box {
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Reduce photo card sizes for better fit */
+      .photo-card {
+        width: 140px !important;
+      }
+
+      /* Reduce letter padding */
+      .letter {
+        padding: 1.5rem 1rem !important;
+      }
+    }
+
+    /* Even smaller screens */
+    @media (max-width: 400px) {
+      .floating-photo {
+        display: none !important;
+      }
+
+      .floating-food {
+        font-size: 1rem !important;
+        opacity: 0.35 !important;
+      }
+
+      .balloon {
+        opacity: 0.5 !important;
+      }
+
+      .orb {
+        display: none !important;
+      }
+
+      .photo-card {
+        width: 120px !important;
+      }
+    }
+
+    /* Reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      .floating-photo,
+      .floating-food,
+      .balloon,
+      .ambient-emoji {
+        display: none !important;
+      }
+
+      .orb, .aurora {
+        animation: none !important;
+      }
     }
 
     /* ========== INTRO OVERLAY ========== */
@@ -1759,7 +1857,9 @@
     // ====== 1. TWINKLING STARS ======
     (function () {
       const f = document.getElementById('star-field');
-      for (let i = 0; i < 100; i++) {
+      const isMobile = window.innerWidth <= 640;
+      const starCount = isMobile ? 30 : 100;
+      for (let i = 0; i < starCount; i++) {
         const s = document.createElement('div');
         s.classList.add('twinkle');
         s.style.left = Math.random() * 100 + '%';
@@ -1853,8 +1953,11 @@
         requestAnimationFrame(rise);
       }
 
-      for (let i = 0; i < 8; i++) setTimeout(spawn, i * 1300);
-      setInterval(spawn, 2800);
+      const isMobileBalloon = window.innerWidth <= 640;
+      const balloonInitCount = isMobileBalloon ? 3 : 8;
+      const balloonInterval = isMobileBalloon ? 6000 : 2800;
+      for (let i = 0; i < balloonInitCount; i++) setTimeout(spawn, i * 1300);
+      setInterval(spawn, balloonInterval);
     })();
 
     // ====== 3. FLOATING FOOD EMOJIS ======
@@ -1865,7 +1968,8 @@
         const el = document.createElement('div');
         el.classList.add('floating-food');
         el.textContent = foods[Math.floor(Math.random() * foods.length)];
-        const sz = 2.5 + Math.random() * 2;
+        const isMobileFood = window.innerWidth <= 640;
+        const sz = isMobileFood ? (1.2 + Math.random() * 0.8) : (2.5 + Math.random() * 2);
         el.style.fontSize = sz + 'rem';
         el.style.left = Math.random() * 100 + '%';
         const dur = 18 + Math.random() * 24;
@@ -1874,8 +1978,11 @@
         layer.appendChild(el);
         setTimeout(() => el.remove(), (dur + 10) * 1000);
       }
-      for (let i = 0; i < 8; i++) setTimeout(spawnFood, i * 2000);
-      setInterval(spawnFood, 4500);
+      const isMobileFoodInit = window.innerWidth <= 640;
+      const foodInitCount = isMobileFoodInit ? 3 : 8;
+      const foodInterval = isMobileFoodInit ? 8000 : 4500;
+      for (let i = 0; i < foodInitCount; i++) setTimeout(spawnFood, i * 2000);
+      setInterval(spawnFood, foodInterval);
     })();
 
     // ====== 4. FLOATING KID PHOTOS ======
@@ -1901,10 +2008,20 @@
         img.alt = 'Floating Kid';
         el.appendChild(img);
 
-        const szWidth = 120 + Math.random() * 50; // 120px to 170px
-        const szHeight = szWidth * 1.25;
-        el.style.width = szWidth + 'px';
-        el.style.height = szHeight + 'px';
+        const isMobilePhoto = window.innerWidth <= 640;
+        if (isMobilePhoto) {
+          // Much smaller floating photos on mobile
+          const szWidth = 55 + Math.random() * 25; // 55px to 80px
+          const szHeight = szWidth * 1.25;
+          el.style.width = szWidth + 'px';
+          el.style.height = szHeight + 'px';
+          el.style.opacity = '0.35';
+        } else {
+          const szWidth = 120 + Math.random() * 50; // 120px to 170px
+          const szHeight = szWidth * 1.25;
+          el.style.width = szWidth + 'px';
+          el.style.height = szHeight + 'px';
+        }
         el.style.left = Math.random() * 75 + '%';
 
         const dur = 20 + Math.random() * 16; // 20s to 36s
@@ -1914,17 +2031,22 @@
         layer.appendChild(el);
         setTimeout(() => el.remove(), (dur + 10) * 1000);
       }
-      for (let i = 0; i < 6; i++) {
+      const isMobilePhotoInit = window.innerWidth <= 640;
+      const photoInitCount = isMobilePhotoInit ? 2 : 6;
+      const photoInterval = isMobilePhotoInit ? 15000 : 7500;
+      for (let i = 0; i < photoInitCount; i++) {
         setTimeout(spawnPhoto, i * 3500);
       }
-      setInterval(spawnPhoto, 7500);
+      setInterval(spawnPhoto, photoInterval);
     })();
 
     // ====== 5. AMBIENT EMOJIS (hearts, butterflies, etc.) ======
     (function () {
       const c = document.getElementById('ambient-emojis');
       const items = ['💜', '💖', '✨', '💫', '🦋', '🌸', '💗', '⭐', '🌙'];
-      for (let i = 0; i < 16; i++) {
+      const isMobileEmoji = window.innerWidth <= 640;
+      const emojiCount = isMobileEmoji ? 5 : 16;
+      for (let i = 0; i < emojiCount; i++) {
         const e = document.createElement('div');
         e.classList.add('ambient-emoji');
         e.textContent = items[Math.floor(Math.random() * items.length)];
@@ -1932,8 +2054,8 @@
         e.style.top = Math.random() * 100 + '%';
         e.style.animationDelay = Math.random() * 10 + 's';
         e.style.animationDuration = (7 + Math.random() * 7) + 's';
-        e.style.fontSize = (0.8 + Math.random() * 1.4) + 'rem';
-        e.style.opacity = 0.06 + Math.random() * 0.1;
+        e.style.fontSize = isMobileEmoji ? (0.6 + Math.random() * 0.6) + 'rem' : (0.8 + Math.random() * 1.4) + 'rem';
+        e.style.opacity = isMobileEmoji ? 0.03 + Math.random() * 0.05 : 0.06 + Math.random() * 0.1;
         c.appendChild(e);
       }
     })();
