@@ -1788,8 +1788,8 @@
               frameborder="0" allowfullscreen class="rounded-xl shadow-lg"></iframe>
         -->
         <div class="aspect-video rounded-xl overflow-hidden mb-6 shadow-inner border border-purple-100">
-          <iframe width="100%" height="100%" style="aspect-ratio:16/9;"
-            src="https://www.youtube.com/embed/5EcOGbldDDw"
+          <iframe id="yt-player" width="100%" height="100%" style="aspect-ratio:16/9;"
+            src="https://www.youtube.com/embed/5EcOGbldDDw?enablejsapi=1"
             frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen class="rounded-xl shadow-lg"></iframe>
         </div>
@@ -2331,6 +2331,27 @@
     const mBtn = document.getElementById('music-btn');
     const mIcon = document.getElementById('music-icon');
     let playing = false;
+    let musicPausedByVideo = false; // track if we paused music for YouTube
+
+    function pauseBgMusic() {
+      if (playing) {
+        aud.pause();
+        mBtn.classList.remove('playing');
+        mIcon.className = 'fas fa-music';
+        playing = false;
+        musicPausedByVideo = true;
+      }
+    }
+
+    function resumeBgMusic() {
+      if (musicPausedByVideo) {
+        aud.play().catch(() => { });
+        mBtn.classList.add('playing');
+        mIcon.className = 'fas fa-pause';
+        playing = true;
+        musicPausedByVideo = false;
+      }
+    }
 
     mBtn.addEventListener('click', () => {
       if (playing) {
@@ -2343,7 +2364,28 @@
         mIcon.className = 'fas fa-pause';
       }
       playing = !playing;
+      musicPausedByVideo = false; // manual toggle resets the flag
     });
+
+    // ====== YOUTUBE API: pause bg music when video plays ======
+    // Load YouTube IFrame API
+    const ytScript = document.createElement('script');
+    ytScript.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(ytScript);
+
+    window.onYouTubeIframeAPIReady = function () {
+      const ytPlayer = new YT.Player('yt-player', {
+        events: {
+          'onStateChange': function (event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+              pauseBgMusic();
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+              resumeBgMusic();
+            }
+          }
+        }
+      });
+    };
 
     // Enter Button overlay handler
     const introOverlay = document.getElementById('intro-overlay');
